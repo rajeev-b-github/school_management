@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Faker;
 use Illuminate\Support\Facades\DB;
 use App\Models\User_profile;
+use App\Models\User;
 
 class User_profileSeeder extends Seeder
 {
@@ -16,12 +17,21 @@ class User_profileSeeder extends Seeder
      */
     public function run()
     {
-        \App\Models\User::factory(10)->create();
 
         $faker = Faker\Factory::create();
+
+        for ($i = 0; $i <= 10; $i++) {
+            User::create([
+                'name' => $faker->name,
+                'email' => $faker->unique()->email,
+                'password' => bcrypt('123456'),
+                'user_type' => $faker->randomElement(['Teacher', 'Student']),
+            ]);
+        }
+
         $users = DB::table('users')
             ->select(DB::raw('id'))
-            ->where('user_type', null)
+            ->where('user_type', '!=', 'admin')
             ->get();
 
         foreach ($users as $user) {
@@ -31,7 +41,6 @@ class User_profileSeeder extends Seeder
                     $width = 200,
                     $height = 200
                 ),
-                'role' => $faker->randomElement(['Teacher', 'Student']),
                 'current_school' => $faker->company(),
                 'previous_school' => $faker->company(),
                 'assigned_teacher' => $faker->name(),
