@@ -17,8 +17,13 @@ class Parents_detailSeeder extends Seeder
     public function run()
     {
         $faker = Faker\Factory::create();
+        // $users = DB::table('users')
+        //     ->select(DB::raw('id'))
+        //     ->get();
+
         $users = DB::table('users')
             ->select(DB::raw('id'))
+            ->where('user_type', 'Student')
             ->get();
 
         foreach ($users as $user) {

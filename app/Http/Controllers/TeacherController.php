@@ -2,32 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StudentRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\Models\Student_profile;
+use App\Models\Teacher_profile;
 use App\Models\Address;
 use App\Models\User;
 use App\Models\Parents_detail;
+use App\Models\Subject;
+use App\Http\Requests\TeacherRequest;
 
-
-class StudentController extends Controller
+class TeacherController extends Controller
 {
-    public function get_id()
-    {
-        return auth()->user()->id;
-    }
-    public function store(StudentRequest $request)
+    public function store(TeacherRequest $request)
     {
         try {
-
             $userID = auth()->user()->id;
             $response[] = "";
-            $result = Student_profile::insert([
+
+            $result = Teacher_profile::insert([
                 'user_id' => $userID,
                 'profile_picture' => $request->profile_picture,
                 'current_school' => $request->current_school,
                 'previous_school' => $request->previous_school,
+                'teacher_experience' => $request->teacher_experience,
             ]);
 
             if ($result) {
@@ -42,22 +38,17 @@ class StudentController extends Controller
                 ]);
 
                 if ($result1) {
-                    $result2 = Parents_detail::insert([
+                    $result2 = Subject::insert([
                         'user_id' => $userID,
-                        'father_name' => $request->father_name,
-                        'mother_name' => $request->mother_name,
-                        'father_occupation' =>
-                        $request->father_occupation,
-                        'mother_occupation' =>
-                        $request->mother_occupation,
-                        'father_contact_no' =>
-                        $request->father_contact_no,
-                        'mother_contact_no' =>
-                        $request->mother_contact_no,
+                        'subject_1' => $request->subject_1,
+                        'subject_2' => $request->subject_2,
+                        'subject_3' => $request->subject_3,
+                        'subject_4' => $request->subject_4,
+                        'subject_5' => $request->subject_5,
+                        'subject_6' => $request->subject_6,
                     ]);
 
                     if ($result2) {
-
                         $response = [
                             'result' => 'User Created succesfully',
                             'status' => '200',
@@ -66,7 +57,7 @@ class StudentController extends Controller
                     } else {
                         $response = [
                             'result' =>
-                            'User Creation Failed at parents detail',
+                            'User Creation Failed at Subjects',
                             'status' => '203',
                             'UserId' => $userID,
                         ];
@@ -74,23 +65,34 @@ class StudentController extends Controller
                 } else {
                     $response = [
                         'result' => 'User Creation Failed at address',
-                        'status' => '200',
+                        'status' => '203',
                         'UserId' => $userID,
                     ];
                 }
             } else {
                 $response = [
-                    'result' => 'User Creation Failed at student_profiles',
+                    'result' => 'User Creation Failed at teacher_profiles',
                     'status' => '203',
                     'UserId' => $userID,
                 ];
             }
             return  $response;
         } catch (\Illuminate\Database\QueryException $e) {
-            return [
-                'result' => $e,
-                203,
-            ];
+            return
+                [
+                    'result' => 'Error Exception : Bad Request',
+                    'status' => '400',
+                    'UserId' => $userID,
+                    'data' => $e,
+                ];
+        } catch (\Exception $e) {
+            return
+                [
+                    'result' => 'Error Exception : Bad Request',
+                    'status' => '400',
+                    'UserId' => $userID,
+                    'data' => $e,
+                ];
         }
     }
 
@@ -103,29 +105,29 @@ class StudentController extends Controller
     public function edit()
     {
         try {
-            $response[] = "";
             $userID = auth()->user()->id;
-            $users = Student_profile::join('users', 'id', '=', 'student_profiles.user_id')
+            $response[] = "";
+            $users = Teacher_profile::join('users', 'id', '=', 'teacher_profiles.user_id')
                 ->join(
                     'addresses',
                     'addresses.user_id',
                     '=',
-                    'student_profiles.user_id'
+                    'teacher_profiles.user_id'
                 )
                 ->join(
-                    'parents_details',
-                    'parents_details.user_id',
+                    'subjects',
+                    'subjects.user_id',
                     '=',
-                    'student_profiles.user_id'
+                    'teacher_profiles.user_id'
                 )
                 ->select(
                     'users.name',
-                    'student_profiles.*',
+                    'teacher_profiles.*',
                     'addresses.*',
-                    'parents_details.*'
+                    'subjects.*'
                 )
-                ->where('users.user_type', '=', 'Student')
-                ->where('student_profiles.user_id', '=', $userID)
+                ->where('users.user_type', '=', 'Teacher')
+                ->where('teacher_profiles.user_id', '=', $userID)
                 ->get();
             if (count($users) > 0) {
                 $response = [
@@ -169,25 +171,25 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StudentRequest $request)
+    public function update(TeacherRequest $request)
     {
         try {
-
             $response[] = "";
             $userID = auth()->user()->id;
-            User::where('id', $userID)
+            User::where('id', $request->user_id)
                 ->update([
                     'name' => $request->name,
                 ]);
-
-            Student_profile::where('user_id', $userID)
+            Teacher_profile::where('user_id', $request->user_id)
                 ->update([
                     'profile_picture' => $request->profile_picture,
                     'current_school' => $request->current_school,
                     'previous_school' => $request->previous_school,
+                    'teacher_experience' => $request->teacher_experience,
                 ]);
 
-            Address::where('user_id', $userID)
+
+            Address::where('user_id', $request->user_id)
                 ->update([
                     'address_1' => $request->address_1,
                     'address_2' => $request->address_2,
@@ -197,15 +199,17 @@ class StudentController extends Controller
                     'pin_code' => $request->pin_code,
                 ]);
 
-            Parents_detail::where('user_id', $request->user_id)
+
+            Subject::where('user_id', $request->user_id)
                 ->update([
-                    'father_name' => $request->father_name,
-                    'mother_name' => $request->mother_name,
-                    'father_occupation' => $request->father_occupation,
-                    'mother_occupation' => $request->mother_occupation,
-                    'father_contact_no' => $request->father_contact_no,
-                    'mother_contact_no' => $request->mother_contact_no,
+                    'subject_1' => $request->subject_1,
+                    'subject_2' => $request->subject_2,
+                    'subject_3' => $request->subject_3,
+                    'subject_4' => $request->subject_4,
+                    'subject_5' => $request->subject_5,
+                    'subject_6' => $request->subject_6,
                 ]);
+
             $response = [
                 'result' => 'Record Updated successfully',
                 'status' => '200',
@@ -230,4 +234,30 @@ class StudentController extends Controller
         }
         return $response;
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    // public function destroy($id)
+    // {
+    //     try {
+
+    //         $result =  Teacher_profile::where('user_id', $id)
+    //             ->delete();
+    //         if ($result) {
+    //             return [
+    //                 'result' => 'Data deleted succesfully',
+    //                 'status' => '200',
+    //             ];
+    //         } else {
+    //             return response()->json('User Not Found with Id : ' . $id, 404);
+    //         }
+    //     } catch (\Illuminate\Database\QueryException $e) {
+    //         //throw $th;
+    //         return ['Error : ' . $e];
+    //     }
+    // }
 }

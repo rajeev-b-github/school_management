@@ -19,6 +19,7 @@ class AddressSeeder extends Seeder
         $faker = Faker\Factory::create();
         $users = DB::table('users')
             ->select(DB::raw('id'))
+            ->where('User_type', '!=', 'admin')
             ->get();
 
 
