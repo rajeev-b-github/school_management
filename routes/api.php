@@ -47,15 +47,38 @@ Route::middleware('auth:api')->group(function () {
 });
 
 // Admin middleware
-Route::middleware(['auth:api', 'isAdmin'])->group(function () {
-    // Delete User
-    Route::put('delete_user/{user_id}', [AdminController::class, 'delete']);
-    // Get Users for approval
-    Route::get('get_users_for_approval/{user_type}', [AdminController::class, 'get_users_for_approval']);
-    // Approve User
-    Route::put('approve_user/{user_id}', [AdminController::class, 'approve_user']);
-    // Approve All Users
-    Route::put('approve_all_users', [AdminController::class, 'approve_all_users']);
-    // Assign Teacher
-    Route::put('assign_teacher', [AdminController::class, 'assign_teacher']);
-});
+// Route::middleware(['auth:api', 'isAdmin'])->group(function () {
+//     // Delete User
+//     Route::put('delete_user/{user_id}', [AdminController::class, 'delete']);
+//     // Get Users for approval
+//     Route::get('get_users_for_approval/{user_type}', [AdminController::class, 'get_users_for_approval']);
+//     // Approve User
+//     Route::put('approve_user/{user_id}', [AdminController::class, 'approve_user']);
+//     // Approve All Users
+//     Route::put('approve_all_users', [AdminController::class, 'approve_all_users']);
+//     // Assign Teacher
+//     Route::put('assign_teacher', [AdminController::class, 'assign_teacher']);
+// });
+
+Route::group(
+    ['prefix' => '/admin', 'middleware' => 'auth:api'],
+    function () {
+        Route::group(
+            ['middleware' => 'isAdmin'],
+            function () {
+                // Delete User
+                Route::put('delete_user/{user_id}', [AdminController::class, 'delete']);
+                // Get Users for approval
+                Route::get('get_users_for_approval/{user_type}', [AdminController::class, 'get_users_for_approval']);
+                // Approve User
+                Route::put('approve_user/{user_id}', [AdminController::class, 'approve_user']);
+                // Approve All Users
+                Route::put('approve_all_users', [AdminController::class, 'approve_all_users']);
+                // Assign Teacher
+                Route::put('assign_teacher', [AdminController::class, 'assign_teacher']);
+            }
+        );
+    }
+);
+
+Route::get('list_user', [TeacherController::class, 'list']);

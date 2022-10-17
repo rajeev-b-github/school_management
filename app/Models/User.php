@@ -38,4 +38,28 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    protected $table = 'users';
+    protected $guarded = ['id'];
+
+    public function address()
+    {
+        return $this->hasOne('Address', 'id');
+    }
+    public function subject()
+    {
+        return $this->hasOne('Subject');
+    }
+    public function parents_detail()
+    {
+        return $this->hasOne('Parents_detail');
+    }
+    public function student_profile()
+    {
+        return $this->hasOne('Student_profile');
+    }
+
+    public function teacher_profile()
+    {
+        return $this->hasOne('Teacher_profile');
+    }
 }

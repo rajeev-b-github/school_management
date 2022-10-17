@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use App\Models\User;
-use App\Models\User_profile;
+use App\Models\Student_profile;
+use App\Models\Teacher_profile;
+use App\Event\UserApproved;
+use App\Event\TeacherAssignedToStudent;
+use Exception;
+
 
 class AdminController extends Controller
 {
@@ -34,18 +39,18 @@ class AdminController extends Controller
             $response[] = "";
             $users = "";
             if ($userType == 'Student') {
-                $users = User::join('user_profiles', 'user_id', '=', 'users.id')
-                    ->join('addresses', 'addresses.user_id', '=', 'user_profiles.user_id')
-                    ->join('parents_details', 'parents_details.user_id', '=', 'user_profiles.user_id')
-                    ->select('users.name', 'users.email', 'user_profiles.*', 'addresses.*', 'parents_details.*')
+                $users = User::join('student_profiles', 'user_id', '=', 'users.id')
+                    ->join('addresses', 'addresses.user_id', '=', 'student_profiles.user_id')
+                    ->join('parents_details', 'parents_details.user_id', '=', 'student_profiles.user_id')
+                    ->select('users.name', 'users.email', 'student_profiles.*', 'addresses.*', 'parents_details.*')
                     ->where('users.user_type', '=', $userType)
                     ->where('users.is_approved', '=', 0)
                     ->get();
             } else {
-                $users = User::join('user_profiles', 'user_id', '=', 'users.id')
-                    ->join('addresses', 'addresses.user_id', '=', 'user_profiles.user_id')
-                    ->join('subjects', 'subjects.user_id', '=', 'user_profiles.user_id')
-                    ->select('users.name', 'users.email', 'user_profiles.*', 'addresses.*', 'subjects.*')
+                $users = User::join('teacher_profiles', 'user_id', '=', 'users.id')
+                    ->join('addresses', 'addresses.user_id', '=', 'teacher_profiles.user_id')
+                    ->join('subjects', 'subjects.user_id', '=', 'teacher_profiles.user_id')
+                    ->select('users.name', 'users.email', 'teacher_profiles.*', 'addresses.*', 'subjects.*')
                     ->where('users.user_type', '=', $userType)
                     ->where('users.is_approved', '=', 0)
                     ->get();
@@ -71,11 +76,15 @@ class AdminController extends Controller
                 ->where('is_approved', 0)
                 ->update(['is_approved' => 1]);
             if ($result) {
-                //$this->sendNotificationToUser($id);
-                //event(new UserApproved($id));
+                $user = User::where('id', $id)
+                    ->where('is_approved', 1)->get();
+                event(new UserApproved($user[0]));
                 $response = ['result' => 'User approved succesfully', 'status' => '200', 'Approved User Id' => $id,];
             } else {
-                $response = ['result' => 'User Not Found or user already approved with Id : ' . $id, 'status' => '404',];
+                $response = [
+                    'result' => 'User Not Found or user already approved with Id : ' . $id,
+                    'status' => '404',
+                ];
             }
             return $response;
         } catch (\Exception $e) {
@@ -92,8 +101,7 @@ class AdminController extends Controller
                 ->update(['is_approved' => 1]);
             if ($result) {
                 foreach ($users as $user) {
-                    //event(new UserApproved($user->user_id));
-                    //$this->sendNotificationToUser($user->user_id);
+                    event(new UserApproved($user->user_id));
                 }
                 $response = [
                     'result' => 'All users approved succesfully', 'status' => '200',
@@ -109,28 +117,29 @@ class AdminController extends Controller
     public function assign_teacher(Request $req)
     {
         try {
+
             $response[] = "";
-            $user = User::where('id', $req->user_id)->where('user_type', 'Student')->get();
-            if ($user) {
-                $result = User_profile::where('user_id', $req->user_id)
-                    ->update(['assigned_teacher' => $req->assigned_teacher]);
+            $student = User::where('id', $req->student_id)->where('user_type', 'Student')->get();
+            $teacher = User::where('id', $req->teacher_id)->where('user_type', 'Teacher')->get();
+
+            if (count($student) > 0) {
+
+                $result = Student_profile::where('user_id', $req->student_id)
+                    ->update(['assigned_teacher' => $teacher[0]->name]);
+
                 if ($result) {
 
-                    // $this->sendNotificationToTeacher(
-                    //     $req->assigned_teacher_id,
-                    //     $req->user_id
-                    // );
-                    //event(new TeacherAssignedToStudent($req->assigned_teacher_id,$req->user_id));
+                    event(new TeacherAssignedToStudent($teacher, $student));
 
                     $response = [
-                        'result' => 'Data assigned teacher succesfully',
+                        'result' => 'Assigned teacher succesfully',
                         'status' => '200',
                         'User_id' => $req->user_id,
-                        'teacher_assigned' => $req->assigned_teacher,
+                        'teacher_assigned' => $teacher[0]->name,
                     ];
                 } else {
                     $response = [
-                        'result' => 'User has not created profile',
+                        'result' => 'Student has not created profile',
                         'status' => '208',
                         'User_id' => $req->user_id,
                     ];
@@ -138,14 +147,14 @@ class AdminController extends Controller
             } else {
 
                 $response = [
-                    'result' => 'User Not a Student',
+                    'result' => 'Student with the id not found',
                     'status' => '208',
                     'User_id' => $req->user_id,
                 ];
             }
 
             return $response;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
         }
     }
@@ -233,56 +242,5 @@ class AdminController extends Controller
     //         return ['Error : ' . $e];
     //     }
     // }
-    // function sendNotificationToTeacher($teacherId, $StudentId)
-    // {
-    //     try {
-    //         $teacher_data = DB::table('users')
-    //             ->select('email', 'name')
-    //             ->where('id', $teacherId)
-    //             ->get();
-    //         $student_data = DB::table('users')
-    //             ->select('name')
-    //             ->where('id', $StudentId)
-    //             ->get();
-    //         $mailData = [
-    //             'name' => $teacher_data[0]->name,
-    //             'body' => 'Meet your new student : ' . $student_data[0]->name,
-    //             'thanks' => 'Thank you',
-    //         ];
 
-    //         Notification::route('mail', $teacher_data[0]->email)->notify(
-    //             new AssignTeacherNotification($mailData)
-    //         );
-    //     } catch (\Exception $e) {
-    //         //throw $th;
-    //         return ['Error : ' . $e];
-    //     }
-
-    //     //return $mailData;
-
-    //     // dd('notification has been sent!');
-    // }
-
-    // function sendNotificationToUser($Id)
-    // {
-    //     try {
-    //         $user_data = DB::table('users')
-    //             ->select('email', 'name')
-    //             ->where('id', $Id)
-    //             ->get();
-
-    //         $mailData = [
-    //             'name' => $user_data[0]->name,
-    //             'body' => 'Your profile has been approved. ',
-    //             'thanks' => 'Thank you',
-    //         ];
-
-    //         Notification::route('mail', $user_data[0]->email)->notify(
-    //             new UserApprovalNotification($mailData)
-    //         );
-    //     } catch (\Exception $e) {
-    //         //throw $th;
-    //         return ['Error : ' . $e];
-    //     }
-    // }
 }

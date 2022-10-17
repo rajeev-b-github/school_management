@@ -48,7 +48,7 @@ class UserController extends Controller
             ) {
                 return response()->json([
                     'success'   => false,
-                    'message'   => 'Authontication errors',
+                    'message'   => 'Authantication errors',
                     'data'      => 'Username or Password incorrect',
                     'Status'    => '422'
                 ]);

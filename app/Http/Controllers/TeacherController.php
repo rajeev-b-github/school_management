@@ -12,6 +12,11 @@ use App\Http\Requests\TeacherRequest;
 
 class TeacherController extends Controller
 {
+    public function list()
+    {
+        $details = User::find(2);
+        dd($details);
+    }
     public function store(TeacherRequest $request)
     {
         try {
@@ -176,11 +181,11 @@ class TeacherController extends Controller
         try {
             $response[] = "";
             $userID = auth()->user()->id;
-            User::where('id', $request->user_id)
+            User::where('id', $userID)
                 ->update([
                     'name' => $request->name,
                 ]);
-            Teacher_profile::where('user_id', $request->user_id)
+            Teacher_profile::where('user_id', $userID)
                 ->update([
                     'profile_picture' => $request->profile_picture,
                     'current_school' => $request->current_school,
@@ -189,7 +194,7 @@ class TeacherController extends Controller
                 ]);
 
 
-            Address::where('user_id', $request->user_id)
+            Address::where('user_id', $userID)
                 ->update([
                     'address_1' => $request->address_1,
                     'address_2' => $request->address_2,
@@ -200,7 +205,7 @@ class TeacherController extends Controller
                 ]);
 
 
-            Subject::where('user_id', $request->user_id)
+            Subject::where('user_id', $userID)
                 ->update([
                     'subject_1' => $request->subject_1,
                     'subject_2' => $request->subject_2,
