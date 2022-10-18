@@ -20,6 +20,11 @@ class CreateStudentProfilesTable extends Migration
             $table->string('previous_school')->nullable();
             $table->string('assigned_teacher')->nullable();
             $table->timestamps();
+            $table
+                ->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 

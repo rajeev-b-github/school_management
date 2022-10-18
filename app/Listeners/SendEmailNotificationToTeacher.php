@@ -33,13 +33,14 @@ class SendEmailNotificationToTeacher
     {
         try {
             $mailData = [
-                'name' => $event->teacher[0]->name,
-                'body' => 'Meet your new student : ' . $event->student[0]->name,
+                'name' => $event->teacher->name,
+                'body' => 'Meet your new student : ' . $event->student->name,
                 'thanks' => 'Thank you',
             ];
-            Notification::route('mail', $event->teacher[0]->email)->notify(
-                new AssignTeacherNotification($mailData)
-            );
+            // Notification::route('mail', $event->teacher[0]->email)->notify(
+            //     new AssignTeacherNotification($mailData)
+            // );
+            Notification::send($event->teacher, new AssignTeacherNotification($mailData));
         } catch (\Exception $e) {
             return  ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
         }

@@ -20,6 +20,11 @@ class CreateTeacherProfilesTable extends Migration
             $table->string('previous_school')->nullable();
             $table->integer('teacher_experience')->nullable();
             $table->timestamps();
+            $table
+                ->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 

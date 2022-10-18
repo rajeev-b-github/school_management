@@ -9,8 +9,9 @@ use App\Models\Student_profile;
 use App\Models\Teacher_profile;
 use App\Event\UserApproved;
 use App\Event\TeacherAssignedToStudent;
+use App\Notifications\PushNotificationToUser;
 use Exception;
-
+use Illuminate\Support\Facades\Notification;
 
 class AdminController extends Controller
 {
@@ -27,10 +28,13 @@ class AdminController extends Controller
             } else {
                 $response = ['result' => 'User Not Found with Id : ' . $id, 'status' => '404',];
             }
-            return $response;
+            return response()->json($response, $response['status']);
         } catch (\Exception $e) {
-            return
-                ['result' => 'Error Exception : Bad Request', 'status' => '400', 'UserId' => $id, 'data' => $e,];
+            $response = [
+                'result' => 'Error Exception : Bad Request',
+                'status' => '400', 'UserId' => $id, 'data' => $e,
+            ];
+            return response()->json($response, $response['status']);
         }
     }
     public function get_users_for_approval($userType)
@@ -61,10 +65,13 @@ class AdminController extends Controller
                 $response = ['result' => 'No record found', 'status' => '203', 'data' => $users,];
             }
 
-            return $response;
+            return response()->json($response, $response['status']);
         } catch (\Exception $e) {
-            return
-                ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
+            $response = [
+                'result' => 'Error Exception : Bad Request',
+                'status' => '400', 'data' => $e,
+            ];
+            return response()->json($response, $response['status']);
         }
     }
 
@@ -86,22 +93,27 @@ class AdminController extends Controller
                     'status' => '404',
                 ];
             }
-            return $response;
+            return response()->json($response, $response['status']);
         } catch (\Exception $e) {
-            return  ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
+            $response = [
+                'result' => 'Error Exception : Bad Request',
+                'status' => '400', 'data' => $e,
+            ];
+            return response()->json($response, $response['status']);
         }
     }
     public function approve_all_users()
     {
         try {
             $response[] = "";
-            $users = User::where('is_approved', 0)
+            $users = User::where('is_approved', 0)->where('user_type', '!=', 'admin')
                 ->get();
-            $result = User::where('is_approved', 0)
+            $result = User::where('is_approved', 0)->where('user_type', '!=', 'admin')
                 ->update(['is_approved' => 1]);
             if ($result) {
                 foreach ($users as $user) {
-                    event(new UserApproved($user->user_id));
+
+                    event(new UserApproved($user));
                 }
                 $response = [
                     'result' => 'All users approved succesfully', 'status' => '200',
@@ -110,8 +122,13 @@ class AdminController extends Controller
             } else {
                 $response = ['result' => 'Users Not Found or users already approved with Id ', 'status' => '404',];
             }
+            return response()->json($response, $response['status']);
         } catch (\Exception $e) {
-            return ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
+            $response = [
+                'result' => 'Error Exception : Bad Request',
+                'status' => '400', 'data' => $e,
+            ];
+            return response()->json($response, $response['status']);
         }
     }
     public function assign_teacher(Request $req)
@@ -129,7 +146,7 @@ class AdminController extends Controller
 
                 if ($result) {
 
-                    event(new TeacherAssignedToStudent($teacher, $student));
+                    event(new TeacherAssignedToStudent($teacher[0], $student[0]));
 
                     $response = [
                         'result' => 'Assigned teacher succesfully',
@@ -153,52 +170,57 @@ class AdminController extends Controller
                 ];
             }
 
-            return $response;
+            return response()->json($response, $response['status']);
         } catch (Exception $e) {
-            return ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
+            $response = [
+                'result' => 'Error Exception : Bad Request',
+                'status' => '400', 'data' => $e,
+            ];
+            return response()->json($response, $response['status']);
         }
     }
-    // public function get_users($user_type)
-    // {
-    //     try {
-    //         $users = DB::table('user_profiles')
-    //             ->join('users', 'users.id', '=', 'user_profiles.user_id')
-    //             ->join(
-    //                 'addresses',
-    //                 'addresses.user_id',
-    //                 '=',
-    //                 'user_profiles.user_id'
-    //             )
-    //             ->join(
-    //                 'parents_details',
-    //                 'parents_details.user_id',
-    //                 '=',
-    //                 'user_profiles.user_id'
-    //             )
-    //             ->select(
-    //                 'users.*',
-    //                 'user_profiles.*',
-    //                 'addresses.*',
-    //                 'parents_details.*'
-    //             )
-    //             ->where('role', '=', $user_type)
-    //             ->get();
-    //         if (count($users) > 0) {
-    //             return [
-    //                 'status' => '200',
-    //                 'record found' => count($users),
-    //                 $users,
-    //             ];
-    //         } else {
-    //             return [
-    //                 'status' => '203',
-    //                 'record found' => count($users),
-    //             ];
-    //         }
-    //     } catch (\Exception $e) {
-    //         return ['Error : ' . $e];
-    //     }
-    // }
+    public function get_users($usertype)
+    {
+        try {
+            $response[] = "";
+            $users = "";
+            if ($usertype == 'student') {
+                $users = User::where('user_type', 'Student')
+                    ->with(['student_profile', 'address', 'parents_detail'])->get();
+            } elseif ($usertype == 'teacher') {
+                $users = User::where('user_type', 'Teacher')
+                    ->with(['teacher_profile', 'address', 'subject'])->get();
+            } else {
+                return [
+                    'result' => 'Invalid User type',
+                    'status' => '203',
+                    'data' => $users,
+                ];
+            }
+
+            if ($users) {
+                $response = [
+                    'result' => ' Record found successfully',
+                    'no_of_records' => count($users),
+                    'status' => '200',
+                    'data' => $users,
+                ];
+            } else {
+                $response = [
+                    'result' => 'Records Not Found',
+                    'status' => '203',
+                    'data' => $users,
+                ];
+            }
+            return response()->json($response, $response['status']);
+        } catch (\Exception $e) {
+            $response = [
+                'result' => 'Error Exception : Bad Request',
+                'status' => '400', 'data' => $e,
+            ];
+            return response()->json($response, $response['status']);
+        }
+    }
     // public function get_user($id)
     // {
     //     try {

@@ -16,7 +16,6 @@ class UserController extends Controller
     public function register(RegisterRequest $req)
     {
         try {
-            //return $req->all();
             $input = $req->all();
             $input['password'] = bcrypt($input['password']);
 
@@ -53,19 +52,34 @@ class UserController extends Controller
                     'Status'    => '422'
                 ]);
             }
-            $responseArray = [
-                'Id' => auth()->user()->id,
-                'user_type' => auth()->user()->user_type,
-                'name' => auth()->user()->name,
-                'email' => auth()->user()->email,
-                'token' => auth()
-                    ->user()
-                    ->createToken('login-token')->accessToken,
-                'success'   => true,
-                'message' => 'Successfull',
-                'data'      => 'User Logged in Successfully',
-                'Status'    => '200'
-            ];
+            if (auth()->user()->is_approved == 1) {
+                $responseArray = [
+                    'Id' => auth()->user()->id,
+                    'user_type' => auth()->user()->user_type,
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'token' => auth()
+                        ->user()
+                        ->createToken('login-token')->accessToken,
+                    'success'   => true,
+                    'message' => 'Successfull',
+                    'data'      => 'User Logged in Successfully',
+                    'Status'    => '200'
+                ];
+            } else {
+                $responseArray = [
+                    'Id' => auth()->user()->id,
+                    'user_type' => auth()->user()->user_type,
+                    'name' => auth()->user()->name,
+                    'email' => auth()->user()->email,
+                    'success'   => false,
+                    'message' => 'Unapproved profile',
+                    'data'      => 'Your not able to login until your profile is approved, please contact admin!!',
+                    'Status'    => '200'
+                ];
+            }
+
+
             return response()->json($responseArray, 200);
         } catch (\Throwable $th) {
             return response()->json($th->getMessage(), 203);

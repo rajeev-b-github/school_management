@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
@@ -43,23 +44,23 @@ class User extends Authenticatable
 
     public function address()
     {
-        return $this->hasOne('Address', 'id');
+        return $this->hasOne(Address::class);
     }
     public function subject()
     {
-        return $this->hasOne('Subject');
+        return $this->hasOne(Subject::class);
     }
     public function parents_detail()
     {
-        return $this->hasOne('Parents_detail');
+        return $this->hasOne(Parents_detail::class);
     }
     public function student_profile()
     {
-        return $this->hasOne('Student_profile');
+        return $this->hasOne(Student_profile::class);
     }
 
     public function teacher_profile()
     {
-        return $this->hasOne('Teacher_profile');
+        return $this->hasOne(Teacher_profile::class);
     }
 }

@@ -24,9 +24,9 @@ class CreateAddressesTable extends Migration
             $table->string('pin_code');
             $table->timestamps();
             // $table->foreignId('user_id')
-            // ->constrained('users')
-            // ->onUpdate('cascade')
-            // ->onDelete('cascade');
+            //     ->constrained('users')
+            //     ->onUpdate('cascade')
+            //     ->onDelete('cascade');
 
             $table
                 ->foreign('user_id')

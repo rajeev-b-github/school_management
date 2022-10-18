@@ -30,7 +30,7 @@ class UserApprovalNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -42,8 +42,8 @@ class UserApprovalNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage())
-            ->from('xyz@mail.com')
-            ->subject('Test mail')
+            ->from(env('MAIL_FROM_ADDRESS'))
+            ->subject('Your pofile approved')
             ->line($this->mailData['name'])
             ->line($this->mailData['body'])
             //->action($this->mailData['offerText'])
@@ -59,7 +59,7 @@ class UserApprovalNotification extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            //
+            'message' => $this->mailData['body']
         ];
     }
 }

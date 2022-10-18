@@ -7,19 +7,20 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AssignTeacherNotification extends Notification implements ShouldQueue
+class PushNotificationToUser extends Notification
 {
     use Queueable;
-    private $mailData;
+    public $details;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($mailData)
+
+    public function __construct($details)
     {
-        $this->mailData = $mailData;
+        $this->details = $details;
     }
 
     /**
@@ -41,14 +42,14 @@ class AssignTeacherNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-
+        //dd($this->details);
         return (new MailMessage())
-            ->from(env('MAIL_FROM_ADDRESS'))
-            ->subject('You assigned to!!')
-            ->line($this->mailData['name'])
-            ->line($this->mailData['body'])
+            ->from('xyz@mail.com')
+            ->subject('Test mail')
+            ->line($this->details['name'])
+            ->line($this->details['body'])
             //->action($this->mailData['offerText'])
-            ->line($this->mailData['thanks']);
+            ->line($this->details['thanks']);
     }
 
     /**
@@ -60,7 +61,7 @@ class AssignTeacherNotification extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            'message' => $this->mailData['body']
+            'order_id' => $this->details['order_id']
         ];
     }
 }

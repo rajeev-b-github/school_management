@@ -19,6 +19,7 @@ class AdminSeeder extends Seeder
             'email' => 'rajeev.b.hestabit@gmail.com',
             'password' => bcrypt('123456'),
             'user_type' => 'admin',
+            'is_approved' => 1,
         ]);
     }
 }
