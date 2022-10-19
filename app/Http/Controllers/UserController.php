@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\ApiResponseController;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\Register;
 use Illuminate\Http\Request;
@@ -45,12 +46,8 @@ class UserController extends Controller
                     'password' => $req->password,
                 ])
             ) {
-                return response()->json([
-                    'success'   => false,
-                    'message'   => 'Authantication errors',
-                    'data'      => 'Username or Password incorrect',
-                    'Status'    => '422'
-                ]);
+                return
+                    ApiResponseController::responseUnauthorized('Username or Password incorrect');
             }
             if (auth()->user()->is_approved == 1) {
                 $responseArray = [
@@ -61,50 +58,25 @@ class UserController extends Controller
                     'token' => auth()
                         ->user()
                         ->createToken('login-token')->accessToken,
-                    'success'   => true,
-                    'message' => 'Successfull',
-                    'data'      => 'User Logged in Successfully',
-                    'Status'    => '200'
                 ];
+                $response = ApiResponseController::responseSuccess('User Logged in Successfully', $responseArray);
             } else {
-                $responseArray = [
-                    'Id' => auth()->user()->id,
-                    'user_type' => auth()->user()->user_type,
-                    'name' => auth()->user()->name,
-                    'email' => auth()->user()->email,
-                    'success'   => false,
-                    'message' => 'Unapproved profile',
-                    'data'      => 'Your not able to login until your profile is approved, please contact admin!!',
-                    'Status'    => '200'
-                ];
+                $response = ApiResponseController::responseFailed('Login Failed :: Your not able to login until your profile is approved, please contact admin!!');
             }
-
-
-            return response()->json($responseArray, 200);
         } catch (\Throwable $th) {
-            return response()->json($th->getMessage(), 203);
+            $response = ApiResponseController::responseServerError($th->getMessage());
         }
+        return $response;
     }
     public function logout(Request $request)
     {
         try {
+            $response[] = "";
             auth()->user()->token()->revoke();
-
-            return response()->json(
-                [
-                    'success'   => true,
-                    'message'   => 'Success',
-                    'data'      => 'User Logged out Successfully',
-                    'Status'    => '203'
-                ]
-            );
+            $response = ApiResponseController::responseSuccess('User Logged out Successfully');
         } catch (\Throwable $th) {
-            return response()->json([
-                'success'   => false,
-                'message'   => 'Logout Failed',
-                'data'      => $th->getMessage(),
-                'Status'    => '203'
-            ]);
+            $response = ApiResponseController::responseServerError($th->getMessage());
         }
+        return $response;
     }
 }

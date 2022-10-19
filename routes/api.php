@@ -50,7 +50,7 @@ Route::group(
             ['middleware' => 'isAdmin'],
             function () {
                 // Delete User
-                Route::put('delete_user/{user_id}', [AdminController::class, 'delete']);
+                Route::delete('delete_user/{user_id}', [AdminController::class, 'delete']);
                 // Get Users for approval
                 Route::get('get_users_for_approval/{user_type}', [AdminController::class, 'get_users_for_approval']);
                 // Approve User

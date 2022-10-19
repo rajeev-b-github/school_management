@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\ApiResponseController;
 use App\Http\Requests\StudentRequest;
 use App\Models\Student_profile;
 use App\Models\Address;
@@ -46,42 +47,20 @@ class StudentController extends Controller
                     $parentsDetail->mother_contact_no = $request->mother_contact_no;
                     $parents = $user->parents_detail()->save($parentsDetail);
                     if ($parents) {
-                        $response = [
-                            'result' => 'Student Profile Created succesfully',
-                            'status' => '200',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseSuccess('Student Profile Created succesfully');
                     } else {
-                        $response = [
-                            'result' =>
-                            'Student Profile Creation Failed at parents detail',
-                            'status' => '203',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseFailed('Student Profile Creation Failed at parents detail');
                     }
                 } else {
-                    $response = [
-                        'result' => 'Student Profile Creation Failed at address',
-                        'status' => '200',
-                        'UserId' => $userID,
-                    ];
+                    $response = ApiResponseController::responseFailed('Student Profile Creation Failed at address');
                 }
             } else {
-                $response = [
-                    'result' => 'Student Profile Creation Failed at student_profiles',
-                    'status' => '203',
-                    'UserId' => $userID,
-                ];
+                $response = ApiResponseController::responseFailed('Student Profile Creation Failed at student_profiles');
             }
-
-            return response()->json($response, $response['status']);
         } catch (\Illuminate\Database\QueryException $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400', 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         }
+        return $response;
     }
 
     /**
@@ -97,36 +76,16 @@ class StudentController extends Controller
             $userID = auth()->user()->id;
             $detail = User::where('id', $userID)->with(['student_profile', 'address', 'parents_detail'])->get();
             if (count($detail) > 0) {
-                $response = [
-                    'result' => 'Record found successfully',
-                    'status' => '200',
-                    'UserId' => $userID,
-                    'data' => $detail,
-                ];
+                $response = ApiResponseController::responseSuccess('Record found successfully', $detail);
             } else {
-                $response = [
-                    'result' => 'Record not found',
-                    'status' => '404',
-                    'UserId' => $userID,
-                    'data' => $detail,
-                ];
+                $response = ApiResponseController::responseNotFound('Record not found');
             }
-            return response()->json($response, $response['status']);
         } catch (\Illuminate\Database\QueryException $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         } catch (\Exception $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         }
+        return $response;
     }
 
     /**
@@ -171,46 +130,21 @@ class StudentController extends Controller
                         'mother_contact_no' => $request->mother_contact_no,
                     ]);
                     if ($parents) {
-                        $response = [
-                            'result' => 'Student Profile Updated succesfully',
-                            'status' => '200',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseSuccess('Student Profile Updated succesfully');
                     } else {
-                        $response = [
-                            'result' =>
-                            'Student Profile Updation Failed at parents detail',
-                            'status' => '203',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseFailed('Student Profile Updation Failed at parents detail');
                     }
                 } else {
-                    $response = [
-                        'result' => 'Student Profile Updation Failed at address',
-                        'status' => '200',
-                        'UserId' => $userID,
-                    ];
+                    $response = ApiResponseController::responseFailed('Student Profile Updation Failed at address');
                 }
             } else {
-                $response = [
-                    'result' => 'Student Profile Updation Failed at student_profiles',
-                    'status' => '203',
-                    'UserId' => $userID,
-                ];
+                $response = ApiResponseController::responseFailed('Student Profile Updation Failed at student_profiles');
             }
         } catch (\Illuminate\Database\QueryException $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
+            $response = ApiResponseController::responseServerError($e->getMessage());
         } catch (\Exception $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
+            $response = ApiResponseController::responseServerError($e->getMessage());
         }
-        return response()->json($response, $response['status']);
+        return $response;
     }
 }

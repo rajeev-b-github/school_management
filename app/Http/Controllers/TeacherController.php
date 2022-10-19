@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\ApiResponseController;
 use App\Models\Teacher_profile;
 use App\Models\Address;
 use App\Models\User;
@@ -47,51 +48,22 @@ class TeacherController extends Controller
                     $subject->subject_6 = $request->subject_6;
                     $tsubject = $user->subject()->save($subject);
                     if ($tsubject) {
-                        $response = [
-                            'result' => 'Teacher Profile Created succesfully',
-                            'status' => '200',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseSuccess('Teacher Profile Created succesfully');
                     } else {
-                        $response = [
-                            'result' =>
-                            'Teacher Profil Creation Failed at Subjects',
-                            'status' => '203',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseFailed('Teacher Profil Creation Failed at Subjects');
                     }
                 } else {
-                    $response = [
-                        'result' => 'Teacher Profile Creation Failed at address',
-                        'status' => '203',
-                        'UserId' => $userID,
-                    ];
+                    $response = ApiResponseController::responseFailed('Teacher Profile Creation Failed at address');
                 }
             } else {
-                $response = [
-                    'result' => 'Teacher Profile Creation Failed at teacher_profiles',
-                    'status' => '203',
-                    'UserId' => $userID,
-                ];
+                $response = ApiResponseController::responseFailed('Teacher Profile Creation Failed at teacher_profiles');
             }
-
-
-            return response()->json($response, $response['status']);
         } catch (\Illuminate\Database\QueryException $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         } catch (\Exception $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         }
+        return $response;
     }
 
     /**
@@ -108,36 +80,16 @@ class TeacherController extends Controller
             $response[] = "";
 
             if (count($detail) > 0) {
-                $response = [
-                    'result' => 'Record found successfully',
-                    'status' => '200',
-                    'UserId' => $userID,
-                    'data' => $detail,
-                ];
+                $response = ApiResponseController::responseSuccess('Record found successfully', $detail);
             } else {
-                $response = [
-                    'result' => 'Record not found',
-                    'status' => '404',
-                    'UserId' => $userID,
-                    'data' => $detail,
-                ];
+                $response = ApiResponseController::responseNotFound('Record not found');
             }
-            return response()->json($response, $response['status']);
         } catch (\Illuminate\Database\QueryException $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         } catch (\Exception $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
-            return response()->json($response, $response['status']);
+            $response = ApiResponseController::responseServerError($e->getMessage());
         }
+        return $response;
     }
 
     /**
@@ -186,46 +138,21 @@ class TeacherController extends Controller
                     ]);
 
                     if ($tsubject) {
-                        $response = [
-                            'result' => 'Teacher Profile Updated succesfully',
-                            'status' => '200',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseSuccess('Teacher Profile Updated succesfully');
                     } else {
-                        $response = [
-                            'result' =>
-                            'Teacher Profile Updation Failed at Subjects',
-                            'status' => '203',
-                            'UserId' => $userID,
-                        ];
+                        $response = ApiResponseController::responseFailed('Teacher Profile Updation Failed at Subjects');
                     }
                 } else {
-                    $response = [
-                        'result' => 'Teacher Profile Updation Failed at address',
-                        'status' => '203',
-                        'UserId' => $userID,
-                    ];
+                    $response = ApiResponseController::responseFailed('Teacher Profile Updation Failed at address');
                 }
             } else {
-                $response = [
-                    'result' => 'Teacher Profile Updation Failed at teacher_profiles',
-                    'status' => '203',
-                    'UserId' => $userID,
-                ];
+                $response = ApiResponseController::responseFailed('Teacher Profile Updation Failed at teachers_profiles');
             }
         } catch (\Illuminate\Database\QueryException $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
+            $response = ApiResponseController::responseServerError($e->getMessage());
         } catch (\Exception $e) {
-            $response = [
-                'result' => 'Error Exception : Bad Request',
-                'status' => '400',
-                'UserId' => $userID, 'data' => $e,
-            ];
+            $response = ApiResponseController::responseServerError($e->getMessage());
         }
-        return response()->json($response, $response['status']);
+        return $response;
     }
 }
