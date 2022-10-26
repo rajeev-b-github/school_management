@@ -72,7 +72,7 @@ class UserController extends Controller
     {
         try {
             $response[] = "";
-            auth()->user()->token()->revoke();
+            auth();
             $response = ApiResponseController::responseSuccess('User Logged out Successfully');
         } catch (\Throwable $th) {
             $response = ApiResponseController::responseServerError($th->getMessage());
