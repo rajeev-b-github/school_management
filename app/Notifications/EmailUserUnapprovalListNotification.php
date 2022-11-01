@@ -30,7 +30,6 @@ class EmailUserUnapprovalListNotification extends Notification implements Should
      */
     public function via($notifiable)
     {
-        // dd('hello');
         return ['mail'];
     }
 
@@ -42,7 +41,6 @@ class EmailUserUnapprovalListNotification extends Notification implements Should
      */
     public function toMail($notifiable)
     {
-        //dd($this->mailData);
         $fileName = $this->createCsvFile($this->mailData);
 
         return (new MailMessage())
@@ -50,7 +48,6 @@ class EmailUserUnapprovalListNotification extends Notification implements Should
             ->subject('Test mail')
             ->line('Admin')
             ->line('Please find attach the list of unapproved users')
-            //->action($this->mailData['offerText'])
             ->line('Thanks')
             ->attach(public_path('export/' . $fileName), [
                 'as' => $fileName,
@@ -65,9 +62,9 @@ class EmailUserUnapprovalListNotification extends Notification implements Should
      */
     public function toArray($notifiable)
     {
-        // return [
-        //         //
-        //     ];
+        return [
+            //
+        ];
     }
     public function createCsvFile($user)
     {

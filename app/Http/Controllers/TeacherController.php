@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\ApiResponseController;
-use App\Models\Teacher_profile;
+use App\Models\TeacherProfile;
 use App\Models\Address;
 use App\Models\User;
 use App\Models\Subject;
@@ -12,6 +12,12 @@ use App\Http\Requests\TeacherRequest;
 
 class TeacherController extends Controller
 {
+    /**
+     * This function create a teacher profile and save it to database.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(TeacherRequest $request)
     {
         try {
@@ -19,13 +25,13 @@ class TeacherController extends Controller
             $response[] = "";
             $user = User::find($userID);
 
-            $teacherProfile = new Teacher_profile();
+            $teacherProfile = new TeacherProfile();
             $teacherProfile->user_id = $userID;
             $teacherProfile->profile_picture = $request->profile_picture;
             $teacherProfile->current_school = $request->current_school;
             $teacherProfile->previous_school = $request->previous_school;
             $teacherProfile->teacher_experience = $request->teacher_experience;
-            $teacher = $user->teacher_profile()->save($teacherProfile);
+            $teacher = $user->teacherProfile()->save($teacherProfile);
 
             if ($teacher) {
                 $address = new Address();
@@ -67,7 +73,7 @@ class TeacherController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Returns the data for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -76,7 +82,7 @@ class TeacherController extends Controller
     {
         try {
             $userID = auth()->user()->id;
-            $detail = User::where('id', $userID)->with(['teacher_profile', 'address', 'subject'])->get();
+            $detail = User::where('id', $userID)->with(['teacherProfile', 'address', 'subject'])->get();
             $response[] = "";
 
             if (count($detail) > 0) {
@@ -109,7 +115,7 @@ class TeacherController extends Controller
 
 
 
-            $teacher = $user->teacher_profile()->update([
+            $teacher = $user->teacherProfile()->update([
                 'profile_picture' => $request->profile_picture,
                 'current_school' => $request->current_school,
                 'previous_school' => $request->previous_school,

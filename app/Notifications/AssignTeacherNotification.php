@@ -47,7 +47,6 @@ class AssignTeacherNotification extends Notification implements ShouldQueue
             ->subject('You assigned to!!')
             ->line($this->mailData['name'])
             ->line($this->mailData['body'])
-            //->action($this->mailData['offerText'])
             ->line($this->mailData['thanks']);
     }
 

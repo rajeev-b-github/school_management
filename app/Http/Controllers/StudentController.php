@@ -4,14 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\ApiResponseController;
 use App\Http\Requests\StudentRequest;
-use App\Models\Student_profile;
+use App\Models\StudentProfile;
 use App\Models\Address;
 use App\Models\User;
-use App\Models\Parents_detail;
+use App\Models\ParentsDetail;
 
 
 class StudentController extends Controller
 {
+    /**
+     * This function create a student profile and save it to database.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  profile parameters
+     * @return \Illuminate\Http\Response
+     */
     public function store(StudentRequest $request)
     {
         try {
@@ -20,12 +27,12 @@ class StudentController extends Controller
             $user = User::find($userID);
 
 
-            $studentProfile = new Student_profile();
+            $studentProfile = new StudentProfile();
             $studentProfile->user_id = $userID;
             $studentProfile->profile_picture = $request->profile_picture;
             $studentProfile->current_school = $request->current_school;
             $studentProfile->previous_school = $request->previous_school;
-            $student = $user->student_profile()->save($studentProfile);
+            $student = $user->studentProfile()->save($studentProfile);
             if ($student) {
                 $address = new Address();
                 $address->user_id = $userID;
@@ -37,7 +44,7 @@ class StudentController extends Controller
                 $address->pin_code = $request->pin_code;
                 $stAddress = $user->address()->save($address);
                 if ($stAddress) {
-                    $parentsDetail = new Parents_detail();
+                    $parentsDetail = new ParentsDetail();
                     $parentsDetail->user_id = $userID;
                     $parentsDetail->father_name = $request->father_name;
                     $parentsDetail->mother_name = $request->mother_name;
@@ -45,7 +52,7 @@ class StudentController extends Controller
                     $parentsDetail->mother_occupation = $request->mother_occupation;
                     $parentsDetail->father_contact_no = $request->father_contact_no;
                     $parentsDetail->mother_contact_no = $request->mother_contact_no;
-                    $parents = $user->parents_detail()->save($parentsDetail);
+                    $parents = $user->parentsDetail()->save($parentsDetail);
                     if ($parents) {
                         $response = ApiResponseController::responseSuccess('Student Profile Created succesfully');
                     } else {
@@ -64,7 +71,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Returns the data for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -74,7 +81,7 @@ class StudentController extends Controller
         try {
             $response[] = "";
             $userID = auth()->user()->id;
-            $detail = User::where('id', $userID)->with(['student_profile', 'address', 'parents_detail'])->get();
+            $detail = User::where('id', $userID)->with(['studentProfile', 'address', 'parentsDetail'])->get();
             if (count($detail) > 0) {
                 $response = ApiResponseController::responseSuccess('Record found successfully', $detail);
             } else {
@@ -104,7 +111,7 @@ class StudentController extends Controller
             $user = User::find($userID);
             $user->update(['name' => $request->name,]);
 
-            $student = $user->student_profile()->update([
+            $student = $user->studentProfile()->update([
                 'profile_picture' => $request->profile_picture,
                 'current_school' => $request->current_school,
                 'previous_school' => $request->previous_school,
@@ -121,7 +128,7 @@ class StudentController extends Controller
                 ]);
                 if ($address) {
 
-                    $parents = $user->parents_detail()->update([
+                    $parents = $user->parentsDetail()->update([
                         'father_name' => $request->father_name,
                         'mother_name' => $request->mother_name,
                         'father_occupation' => $request->father_occupation,

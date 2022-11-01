@@ -14,6 +14,12 @@ use Exception;
 
 class UserController extends Controller
 {
+    /**
+     * Register the specified resource to database.
+     *
+     * @param  int  $id and other registration fields
+     * @return \Illuminate\Http\Response
+     */
     public function register(RegisterRequest $req)
     {
         try {
@@ -33,10 +39,15 @@ class UserController extends Controller
             return response()->json($responseArray, 200);
         } catch (\Exception $ex) {
 
-            return response()->json($ex->getMessage(),);
+            return response()->json($ex->getMessage());
         }
     }
-
+    /**
+     * Login the specified resource.
+     *
+     * @param  email and password
+     * @return \Illuminate\Http\Response
+     */
     public function login(LoginRequest $req)
     {
         try {
@@ -68,11 +79,16 @@ class UserController extends Controller
         }
         return $response;
     }
+    /**
+     * Logout the given resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function logout(Request $request)
     {
         try {
             $response[] = "";
-            auth();
+            auth()->user()->token()->revoke();
             $response = ApiResponseController::responseSuccess('User Logged out Successfully');
         } catch (\Throwable $th) {
             $response = ApiResponseController::responseServerError($th->getMessage());

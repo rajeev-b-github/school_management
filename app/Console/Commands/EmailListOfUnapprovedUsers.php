@@ -57,7 +57,6 @@ class EmailListOfUnapprovedUsers extends Command
             } else {
                 dd('No Data to send...');
             }
-            //return $response;
         } catch (\Exception $e) {
             return ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];
         }

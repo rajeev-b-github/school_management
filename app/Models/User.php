@@ -50,17 +50,17 @@ class User extends Authenticatable
     {
         return $this->hasOne(Subject::class);
     }
-    public function parents_detail()
+    public function parentsDetail()
     {
-        return $this->hasOne(Parents_detail::class);
+        return $this->hasOne(ParentsDetail::class);
     }
-    public function student_profile()
+    public function studentProfile()
     {
-        return $this->hasOne(Student_profile::class);
+        return $this->hasOne(StudentProfile::class);
     }
 
-    public function teacher_profile()
+    public function teacherProfile()
     {
-        return $this->hasOne(Teacher_profile::class);
+        return $this->hasOne(TeacherProfile::class);
     }
 }

@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Address;
 use Faker;
 use Illuminate\Support\Facades\DB;
+use App\Models\ParentsDetail;
 
-class AddressSeeder extends Seeder
+class ParentsDetailSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,14 +16,14 @@ class AddressSeeder extends Seeder
      */
     public function run()
     {
+
         $users = DB::table('users')
             ->select(DB::raw('id'))
-            ->where('User_type', '!=', 'admin')
+            ->where('user_type', 'Student')
             ->get();
 
-
         foreach ($users as $user) {
-            Address::factory()->create(['user_id' => $user->id]);
+            ParentsDetail::factory()->create(['user_id' => $user->id]);
         }
     }
 }

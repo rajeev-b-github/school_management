@@ -20,7 +20,7 @@ class SendEmailNotificationToTeacher
 
     public function __construct()
     {
-        //
+        //no value to use
     }
 
     /**
@@ -37,9 +37,7 @@ class SendEmailNotificationToTeacher
                 'body' => 'Meet your new student : ' . $event->student->name,
                 'thanks' => 'Thank you',
             ];
-            // Notification::route('mail', $event->teacher[0]->email)->notify(
-            //     new AssignTeacherNotification($mailData)
-            // );
+
             Notification::send($event->teacher, new AssignTeacherNotification($mailData));
         } catch (\Exception $e) {
             return  ['result' => 'Error Exception : Bad Request', 'status' => '400', 'data' => $e,];

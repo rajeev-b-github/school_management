@@ -44,24 +44,19 @@ Route::middleware('auth:api')->group(function () {
 
 
 Route::group(
-    ['prefix' => '/admin', 'middleware' => 'auth:api'],
+    ['prefix' => '/admin', 'middleware' => ['auth:api', 'isAdmin']],
     function () {
-        Route::group(
-            ['middleware' => 'isAdmin'],
-            function () {
-                // Delete User
-                Route::delete('delete_user/{user_id}', [AdminController::class, 'delete']);
-                // Get Users for approval
-                Route::get('get_users_for_approval/{user_type}', [AdminController::class, 'get_users_for_approval']);
-                // Approve User
-                Route::put('approve_user/{user_id}', [AdminController::class, 'approve_user']);
-                // Approve All Users
-                Route::put('approve_all_users', [AdminController::class, 'approve_all_users']);
-                // Assign Teacher
-                Route::put('assign_teacher', [AdminController::class, 'assign_teacher']);
-                // Get all users by user_type
-                Route::get('get_users/{user_type}', [AdminController::class, 'get_users']);
-            }
-        );
+        // Delete User
+        Route::delete('delete_user/{user_id}', [AdminController::class, 'delete']);
+        // Get Users for approval
+        Route::get('get_users_for_approval/{user_type}', [AdminController::class, 'getUsersForApproval']);
+        // Approve User
+        Route::put('approve_user/{user_id}', [AdminController::class, 'approveUser']);
+        // Approve All Users
+        Route::put('approve_all_users', [AdminController::class, 'approveAllUsers']);
+        // Assign Teacher
+        Route::put('assign_teacher', [AdminController::class, 'assignTeacher']);
+        // Get all users by user_type
+        Route::get('get_users/{user_type}', [AdminController::class, 'getUsers']);
     }
 );
